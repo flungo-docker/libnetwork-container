@@ -5,7 +5,7 @@ teardown() {
 }
 
 @test "create network" {
-    docker network create -d tor vidalia
+    docker network create -d container vidalia
 }
 
 @test "check bridge was created" {
@@ -73,7 +73,7 @@ teardown() {
 
 @test "create network without tor-router fails" {
     docker rm -f tor-router
-    run docker network create -d tor vidalia
+    run docker network create -d container vidalia
 
     [ "$status" -ne 0 ]
     #[[ "$output" =~ *"No such container"* ]]

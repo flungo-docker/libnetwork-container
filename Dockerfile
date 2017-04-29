@@ -8,7 +8,7 @@ RUN	apk add --no-cache \
 	ca-certificates \
         iptables
 
-COPY . /go/src/github.com/jessfraz/onion
+COPY . /go/src/github.com/flungo-docker/libnetwork-container
 
 RUN set -x \
 	&& apk add --no-cache --virtual .build-deps \
@@ -17,11 +17,11 @@ RUN set -x \
 		gcc \
 		libc-dev \
 		libgcc \
-	&& cd /go/src/github.com/jessfraz/onion \
-	&& go build -o /usr/bin/onion . \
+	&& cd /go/src/github.com/flungo-docker/libnetwork-container \
+	&& go build -o /usr/bin/libnetwork-container . \
 	&& apk del .build-deps \
 	&& rm -rf /go \
 	&& echo "Build complete."
 
 
-ENTRYPOINT [ "onion" ]
+ENTRYPOINT [ "libnetwork-container" ]

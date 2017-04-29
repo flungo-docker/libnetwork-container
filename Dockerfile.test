@@ -25,9 +25,9 @@ RUN cd /tmp \
 RUN go get github.com/golang/lint/golint \
 	&& go install cmd/vet
 
-COPY . /go/src/github.com/jessfraz/onion
+COPY . /go/src/github.com/flungo-docker/libnetwork-container
 
-WORKDIR /go/src/github.com/jessfraz/onion
+WORKDIR /go/src/github.com/flungo-docker/libnetwork-container
 
 RUN go build -o /usr/bin/onion .
 

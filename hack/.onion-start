@@ -12,7 +12,7 @@ trap "source ${DIR}/.onion-stop" EXIT
 # give it a little time to come up so it's "ready"
 tries=60
 echo "INFO: Waiting for onion to start..."
-while ! [ ! -f /var/run/docker/plugins/tor.sock ] &> /dev/null; do
+while ! [ ! -f /var/run/docker/plugins/container.sock ] &> /dev/null; do
 	(( tries-- ))
 	if [ $tries -le 0 ]; then
 		printf "\n"

@@ -8,25 +8,20 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/pkg/pidfile"
 	"github.com/docker/go-plugins-helpers/network"
-	"github.com/jessfraz/onion/tor"
+	"github.com/flungo-docker/libnetwork-container/tor"
 )
 
 const (
 	// BANNER is what is printed for help/info output
-	BANNER = `             _
-  ___  _ __ (_) ___  _ __
- / _ \| '_ \| |/ _ \| '_ \
-| (_) | | | | | (_) | | | |
- \___/|_| |_|_|\___/|_| |_|
-
- Tor networking plugin for docker containers
+	BANNER = `libnetwork-container
+ Docker network driver for routing through another container
  Version: %s
 
 `
 	// VERSION is the binary version.
-	VERSION = "v0.1.0"
+	VERSION = "v0.1.0-dev"
 
-	defaultPidFile = "/var/run/onion.pid"
+	defaultPidFile = "/var/run/libnetwork-container.pid"
 )
 
 var (
@@ -82,7 +77,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 	h := network.NewHandler(d)
-	h.ServeUnix("root", "tor")
+	h.ServeUnix("root", "container")
 }
 
 func usageAndExit(message string, exitCode int) {
