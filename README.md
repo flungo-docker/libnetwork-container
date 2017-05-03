@@ -45,20 +45,20 @@ $ docker logs -f tor-router
 
 ## Create a network
 
-The network is created as you would create a network with any other driver. By default, the name required for the routing container will be the name of the network suffixed by `-router` so if a network is created named `tor`, the router should be named `tor-router`. To use a name other than this default, the `me.flungo.network.container.router` option can be set.
+The network can be created with the `docker network create` command using the `container` driver and specifying the `me.flungo.network.container.router` as the name of the container which should be used as the routing container.
 
-The following example creates a network named `vidalia` which will use a router named `tor-router`:
+The following example creates a network named `tor` which will use a router named `tor-router`:
 
 ```console
 $ docker network create -d container \
     -o me.flungo.network.container.router=tor-router \
-    vidalia
+    tor
 ```
 
 Once the network is created, you will need to complete this step by adding your router to the network. For the Tor example, this is:
 
 ```console
-$ docker network connect vidalia tor-router
+$ docker network connect tor tor-router
 ```
 
 ## Run a container
@@ -68,7 +68,7 @@ The last step is to connect your containers to the new network. Again this shoul
 With the Tor example, the following can be used to test that the request is router through the Tor network.
 
 ```console
-$ docker run --rm -it --net vidalia jess/httpie \
+$ docker run --rm -it --net tor jess/httpie \
     -v --json https://check.torproject.org/api/ip
 ```
 

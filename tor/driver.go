@@ -21,11 +21,12 @@ const (
 	bridgePrefix     = "torbr-"
 	containerEthName = "eth"
 
-	mtuOption        = "net.jessfraz.tor.bridge.mtu"
-	bridgeNameOption = "net.jessfraz.tor.bridge.name"
+	genericOptionsKey = "com.docker.network.generic"
+	mtuOption         = "net.jessfraz.tor.bridge.mtu"
+	bridgeNameOption  = "net.jessfraz.tor.bridge.name"
+	routerNameOption  = "me.flungo.network.container.router"
 
-	defaultMTU          = 1500
-	defaultTorContainer = "tor-router"
+	defaultMTU = 1500
 )
 
 // Driver represents the interface for the network plugin driver.
@@ -94,6 +95,11 @@ func (d *Driver) CreateNetwork(r *network.CreateNetworkRequest) error {
 		return err
 	}
 
+	routerName, err := getRouterName(r)
+	if err != nil {
+		return err
+	}
+
 	gateway, mask, err := getGatewayIP(r)
 	if err != nil {
 		return err
@@ -105,12 +111,12 @@ func (d *Driver) CreateNetwork(r *network.CreateNetworkRequest) error {
 	}
 
 	// get tor router ip
-	torIP, err := d.getTorRouterIP()
+	torIP, err := d.getContainerIP(routerName)
 	if err != nil {
 		return err
 	}
 
-	logrus.Debugf("tor router ip is: %s", torIP)
+	logrus.Debugf("Router ip for %s is: %s", routerName, torIP)
 
 	ns := &NetworkState{
 		BridgeName:  bridgeName,

@@ -143,10 +143,26 @@ func getGatewayIP(r *network.CreateNetworkRequest) (string, string, error) {
 	return parts[0], parts[1], nil
 }
 
-func (d *Driver) getTorRouterIP() (string, error) {
-	c, err := d.dcli.ContainerInspect(context.Background(), defaultTorContainer)
+func getGenericOptions(r *network.CreateNetworkRequest) map[string]interface{} {
+	// Relies on the key always being there. Might need to check the cast was successful?
+	return r.Options[genericOptionsKey].(map[string]interface{})
+}
+
+func getRouterName(r *network.CreateNetworkRequest) (string, error) {
+	genericOptions := getGenericOptions(r)
+	if genericOptions[routerNameOption] != nil {
+		if routerName, ok := genericOptions[routerNameOption].(string); ok {
+			return routerName, nil
+		}
+	}
+	// TODO: default to network name + suffix (is the given name available?)
+	return "", fmt.Errorf("Router container not specified: speficy the routing container with the '%s' option", routerNameOption)
+}
+
+func (d *Driver) getContainerIP(name string) (string, error) {
+	c, err := d.dcli.ContainerInspect(context.Background(), name)
 	if err != nil {
-		return "", fmt.Errorf("Getting tor routing container %s failed: %v", defaultTorContainer, err)
+		return "", fmt.Errorf("Getting container %s failed: %v", name, err)
 	}
 
 	return c.NetworkSettings.IPAddress, nil
