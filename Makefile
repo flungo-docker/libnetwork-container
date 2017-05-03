@@ -12,15 +12,15 @@ DOCKER_ENVS := \
 # (default to no bind mount if DOCKER_HOST is set)
 # note: BINDDIR is supported for backwards-compatibility here
 BIND_DIR := $(if $(BINDDIR),$(BINDDIR),$(if $(DOCKER_HOST),,logs))
-DOCKER_MOUNT := $(if $(BIND_DIR),-v "$(CURDIR)/$(BIND_DIR):/var/log/onion")
+DOCKER_MOUNT := $(if $(BIND_DIR),-v "$(CURDIR)/$(BIND_DIR):/var/log/libnetwork-container")
 
 # This allows the test suite to be able to run without worrying about the underlying fs used by the container running the daemon (e.g. aufs-on-aufs), so long as the host running the container is running a supported fs.
 # The volume will be cleaned up when the container is removed due to `--rm`.
 # Note that `BIND_DIR` will already be set to `bundles` if `DOCKER_HOST` is not set (see above BIND_DIR line), in such case this will do nothing since `DOCKER_MOUNT` will already be set.
-DOCKER_MOUNT := $(if $(DOCKER_MOUNT),$(DOCKER_MOUNT),-v "/var/log/onion")
+DOCKER_MOUNT := $(if $(DOCKER_MOUNT),$(DOCKER_MOUNT),-v "/var/log/libnetwork-container")
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
-DOCKER_IMAGE := onion-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
+DOCKER_IMAGE := libnetwork-container-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
 
 # if this session isn't interactive, then we don't want to allocate a
 # TTY, which would fail, but if it is interactive, we do want to attach
@@ -36,7 +36,7 @@ DOCKER_RUN_CI := docker run --rm -i $(DOCKER_FLAGS) --entrypoint make --privileg
 all: build
 
 build:
-	go build ./...
+	go build $(shell go list ./... | grep -v /vendor/)
 
 clean:
 	rm -rf logs
@@ -45,16 +45,16 @@ ci: dtest-build
 	$(DOCKER_RUN_CI) test
 
 dbuild:
-	@docker build --rm --force-rm -t jess/onion .
+	@docker build --rm --force-rm -t flungo/libnetwork-container .
 
 drun:
 	@docker run -d \
-		--name onion \
+		--name libnetwork-container \
 		--cap-add NET_ADMIN \
 		--net host \
 		-v /run/docker/plugins:/run/docker/plugins \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		jess/onion -d
+		flungo/libnetwork-container -d
 
 dtor:
 	@docker run -d \
