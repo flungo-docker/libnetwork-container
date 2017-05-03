@@ -85,12 +85,12 @@ func (d *Driver) GetCapabilities() (*network.CapabilitiesResponse, error) {
 func (d *Driver) CreateNetwork(r *network.CreateNetworkRequest) error {
 	logrus.Debugf("Create network request: %+v", r)
 
-	bridgeName, err := getBridgeName(r.NetworkID, r.Options)
+	bridgeName, err := getBridgeName(r)
 	if err != nil {
 		return err
 	}
 
-	mtu, err := getBridgeMTU(r.Options)
+	mtu, err := getBridgeMTU(r)
 	if err != nil {
 		return err
 	}

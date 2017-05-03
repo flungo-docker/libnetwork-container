@@ -3,6 +3,7 @@ package tor
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -86,24 +87,43 @@ func truncateID(id string) string {
 	return id[:5]
 }
 
-func getBridgeMTU(opts map[string]interface{}) (int, error) {
-	bridgeMTU := defaultMTU
-	if opts != nil {
-		if mtu, ok := opts[mtuOption].(int); ok {
-			bridgeMTU = mtu
-		}
-	}
-	return bridgeMTU, nil
+func getGenericOptions(r *network.CreateNetworkRequest) map[string]interface{} {
+	// Relies on the key always being there. Might need to check the cast was successful?
+	// By requiring the network.CreateNetworkRequest we know the the Options should contain the genericOptionsKey
+	return r.Options[genericOptionsKey].(map[string]interface{})
 }
 
-func getBridgeName(id string, opts map[string]interface{}) (string, error) {
-	bridgeName := bridgePrefix + truncateID(id)
-	if opts != nil {
-		if name, ok := opts[bridgeNameOption].(string); ok {
-			bridgeName = name
+func getGenericOption(r *network.CreateNetworkRequest, opt string, def string) (string, error) {
+	genericOptions := getGenericOptions(r)
+	if genericOptions[opt] != nil {
+		if value, ok := genericOptions[opt].(string); ok {
+			return value, nil
 		}
+		return "", fmt.Errorf("Casting the value of the %s option to string failed: %v", opt, genericOptions[opt])
 	}
-	return bridgeName, nil
+	return def, nil
+}
+
+func getBridgeMTU(r *network.CreateNetworkRequest) (int, error) {
+	mtu, err := getGenericOption(r, mtuOption, "")
+	if err != nil {
+		return 0, err
+	}
+	if mtu != "" {
+		return strconv.Atoi(mtu)
+	}
+	return defaultMTU, nil
+}
+
+func getBridgeName(r *network.CreateNetworkRequest) (string, error) {
+	bridgeName, err := getGenericOption(r, bridgeNameOption, "")
+	if err != nil {
+		return "", err
+	}
+	if bridgeName != "" {
+		return bridgeName, nil
+	}
+	return bridgePrefix + truncateID(r.NetworkID), nil
 }
 
 func getGatewayIP(r *network.CreateNetworkRequest) (string, string, error) {
@@ -143,17 +163,13 @@ func getGatewayIP(r *network.CreateNetworkRequest) (string, string, error) {
 	return parts[0], parts[1], nil
 }
 
-func getGenericOptions(r *network.CreateNetworkRequest) map[string]interface{} {
-	// Relies on the key always being there. Might need to check the cast was successful?
-	return r.Options[genericOptionsKey].(map[string]interface{})
-}
-
 func getRouterName(r *network.CreateNetworkRequest) (string, error) {
-	genericOptions := getGenericOptions(r)
-	if genericOptions[routerNameOption] != nil {
-		if routerName, ok := genericOptions[routerNameOption].(string); ok {
-			return routerName, nil
-		}
+	routerName, err := getGenericOption(r, routerNameOption, "")
+	if err != nil {
+		return "", err
+	}
+	if routerName != "" {
+		return routerName, nil
 	}
 	// TODO: default to network name + suffix (is the given name available?)
 	return "", fmt.Errorf("Router container not specified: speficy the routing container with the '%s' option", routerNameOption)
