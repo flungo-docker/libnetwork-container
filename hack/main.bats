@@ -4,8 +4,21 @@ teardown() {
     docker rm -vf $(docker ps -a | grep -v ID | grep -v tor-router | awk '{ print $1 }' 2> /dev/null) &>/dev/null || true
 }
 
+@test "creating network without router name should fail" {
+    # TODO: Use `run` to make better assertions
+    ! docker network create -d container vidalia
+}
+
+@test "check bridge was not created" {
+    ! ip a | grep -q torbr-
+}
+
+@test "check iptables chain was not created" {
+    ! iptables-save | grep -q TOR
+}
+
 @test "create network" {
-    docker network create -d container vidalia
+    docker network create -d container -o me.flungo.network.container.router=tor-router vidalia
 }
 
 @test "check bridge was created" {
