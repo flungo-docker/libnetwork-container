@@ -172,7 +172,7 @@ func getRouterName(r *network.CreateNetworkRequest) (string, error) {
 		return routerName, nil
 	}
 	// TODO: default to network name + suffix (is the given name available?)
-	return "", fmt.Errorf("Router container not specified: speficy the routing container with the '%s' option", routerNameOption)
+	return "", fmt.Errorf("Routing container not specified: speficy the routing container with the '%s' option", routerNameOption)
 }
 
 func (d *Driver) getContainerIP(name string) (string, error) {

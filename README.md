@@ -15,7 +15,7 @@ This driver allows networks to be created where a container is used as the defau
 
 **NOTE:** Make sure you are using Docker 1.9 or later
 
-To start the driver and make it available for use with `docker network commands` the following command should be used:
+To start the driver and make it available for use with `docker network`, commands the following command should be used:
 
 ```console
 $ docker run -d \
